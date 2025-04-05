@@ -16,7 +16,7 @@ from lightgbm import LGBMRegressor
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 import time
 
-# Настройка логирования
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class EnhancedBindingDBCollector:
@@ -31,15 +31,15 @@ class EnhancedBindingDBCollector:
     def get_protein_data_from_chembl(self, target_chembl_id):
         """Получение данных о белке из ChEMBL"""
         try:
-            # Получаем подробную информацию о белке
+            # Получаем информацию о белке
             target = self.target.get(target_chembl_id)
             
-            # Проверяем, что это человеческий белок
+            # Проверка на человеческий белок
             if target['organism'] != 'Homo sapiens':
                 logging.warning(f"Пропуск не человеческого белка {target_chembl_id}")
                 return None
                 
-            # Получаем компоненты белка (включая последовательность)
+            #компоненты белка 
             components = target.get('target_components', [])
             if not components:
                 logging.warning(f"Нет данных о компонентах белка {target_chembl_id}")
@@ -66,14 +66,14 @@ class EnhancedBindingDBCollector:
     def get_all_protein_targets_from_chembl(self):
         """Получение списка белковых мишеней из ChEMBL"""
         try:
-            # Получаем список всех человеческих белковых мишеней
+            # список всех человеческих белковых мишеней
             targets = self.target.filter(
                 target_type="SINGLE PROTEIN",
                 organism="Homo sapiens",
-                limit=1000  # Увеличьте лимит при необходимости
+                limit=1000 
             )
             
-            # Фильтруем только те мишени, для которых есть данные об активности
+            
             target_ids = []
             for target in targets:
                 target_id = target['target_chembl_id']
@@ -96,13 +96,13 @@ class EnhancedBindingDBCollector:
     def get_inhibitors_chembl(self, target_chembl_id, limit=3):
         """Получение ингибиторов для белка из ChEMBL"""
         try:
-            # Получаем механизмы действия для целевого белка
+            #механизмы действия для целевого белка
             mechanisms = self.mechanism.filter(
                 target_chembl_id=target_chembl_id,
                 action_type__icontains='INHIBITOR'
             )
 
-            # Получаем активности для ингибиторов
+            # активность для ингибиторов
             activities = self.activity.filter(
                 target_chembl_id=target_chembl_id,
                 standard_type__in=['IC50', 'Ki'],
@@ -115,7 +115,7 @@ class EnhancedBindingDBCollector:
                 if not (act.get('standard_value') and act.get('molecule_chembl_id')):
                     continue
 
-                # Получаем информацию о молекуле
+                # информация о молекуле
                 molecule = self.molecule.get(act['molecule_chembl_id'])
                 if not molecule.get('molecule_structures', {}).get('canonical_smiles'):
                     continue
@@ -176,13 +176,13 @@ class EnhancedBindingDBCollector:
         data = []
         processed_count = 0
 
-        # Получаем список белков
+        # список белков
         protein_list = self.get_all_protein_targets_from_chembl()
         if not protein_list:
             logging.error("Не удалось получить список белков")
             return pd.DataFrame()
 
-        # Загрузка предыдущего чекпоинта
+        # чекпоинт
         try:
             if os.path.exists(self.checkpoint_file):
                 with open(self.checkpoint_file, 'r') as f:
@@ -198,22 +198,22 @@ class EnhancedBindingDBCollector:
             batch_proteins = protein_list[i:i + batch_size]
             
             for protein in batch_proteins:
-                # Получаем данные о белке
+                #данные о белке
                 protein_data = self.get_protein_data_from_chembl(protein)
                 if not protein_data:
                     logging.warning(f"Пропуск белка {protein} из-за отсутствия данных")
                     continue
 
-                # Вычисляем свойства белка
+                # свойства белка
                 protein_properties = self.get_extended_protein_properties(protein_data['sequence'])
 
-                # Получаем ингибиторы
+                # ингибиторы
                 inhibitors = self.get_inhibitors_chembl(protein, limit=inhibitors_per_protein)
                 if not inhibitors:
                     logging.warning(f"Нет ингибиторов для белка {protein}")
                     continue
 
-                # Обрабатываем каждый ингибитор
+                
                 for inhibitor in inhibitors:
                     mol = Chem.MolFromSmiles(inhibitor['smiles'])
                     if mol is None:
@@ -244,7 +244,7 @@ class EnhancedBindingDBCollector:
                 processed_count += 1
                 logging.info(f"Обработано белков: {processed_count}/{len(protein_list)}")
 
-            # Сохранение чекпоинта после каждой группы
+            # Сохранение чекпоинта после каждой группы чтобы в случае ошибки не потерять данные 
             self.save_checkpoint(data, processed_count)
 
         return pd.DataFrame(data)
@@ -271,7 +271,7 @@ def main():
         logging.error("Нет собранных данных для обучения.")
         return
 
-    # Подготовка данных для обучения
+    
     feature_columns = [col for col in df.columns if col.startswith(('protein_', 'inhibitor_')) 
                       and col not in ['protein_id', 'protein_sequence', 'protein_name', 
                                     'protein_gene', 'protein_organism', 'protein_class', 
