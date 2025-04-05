@@ -9,7 +9,7 @@ class Cache:
         self.cache_dir = cache_dir
         self.expiration_days = expiration_days
         
-        # Создаем директорию для кэша, если её нет
+       
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
     
