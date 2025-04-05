@@ -1,5 +1,33 @@
 # ML for Inhibition of proteins
-This algorithm is based on three machine-learning models that are employed to inhibit proteins using IC50 and Ki values. It was developed as a part of a scientific contest in infochemistry, and it compiles a database of protein and inhibitor information from the ChEMBL repository, saving it in the CSV format.
-![metrics_comparison](https://github.com/user-attachments/assets/a1e119cc-438a-4e12-b6c5-893cdd483a20)
-Subsequently, the three models — CatBoost, LightGBM, and XGBoost — are trained using the accumulated data, and the most effective model is chosen using scikit-learn. Lastly, graphs are produced from the chosen model.
+
+
+**Описание алгоритма**  
+Данный алгоритм использует три модели машинного обучения (CatBoost, LightGBM и XGBoost) для предсказания ингибирования белков на основе значений **IC50** (полумаксимальная ингибирующая концентрация) и **Ki** (константа ингибирования). Он был разработан в рамках научного конкурса по инфохимии, объединяющего методы химии и data science. 
+
+**Этапы работы алгоритма:**  
+1. **Сбор данных**  
+   Алгоритм формирует базу данных из репозитория [ChEMBL](https://www.ebi.ac.uk/chembl/) — крупнейшего источника информации о биоактивных молекулах. Данные о белках и их ингибиторах сохраняются в формате CSV для удобства обработки.
+
+2. **Обучение моделей**  
+   - **CatBoost**: Эффективен для категориальных данных и устойчив к переобучению.  
+   - **LightGBM**: Оптимизирован для скорости и работы с большими наборами данных.  
+   - **XGBoost**: Известен высокой точностью и гибкостью настроек.  
+   Модели обучаются на накопленных данных, включая фичи, связанные со структурой молекул и их взаимодействием с белками.
+
+3. **Выбор оптимальной модели**  
+   С помощью библиотеки **scikit-learn** проводится валидация и сравнение метрик (например, точность, AUC-ROC, F1-скор). На графике ниже показано сравнение результатов:  
+   ![metrics_comparison](https://github.com/user-attachments/assets/a1e119cc-438a-4e12-b6c5-893cdd483a20)  
+   По итогам выбирается модель с наивысшей предсказательной способностью.
+
+4. **Визуализация результатов**  
+   Финальный этап включает генерацию графиков: зависимость активности ингибиторов от структурных параметров, ROC-кривые, важность фичей. Это помогает интерпретировать выводы и оптимизировать дизайн новых ингибиторов.
+
+**Применение**  
+Алгоритм полезен в докинге (молекулярном моделировании) для ускорения разработки лекарств, позволяя сократить время поиска потенциально эффективных соединений.
+
+
+
+
+
+
 
