@@ -20,7 +20,7 @@ from datetime import datetime
 import random
 from Bio.SeqUtils.ProtParam import ProteinAnalysis
 
-# Настройка логирования
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -29,20 +29,20 @@ logging.basicConfig(
 
 class ProteinInhibitorCollector:
     def __init__(self):
-        # Настройка сессии с повторными попытками
+        
         self.session = requests.Session()
         retries = Retry(
-            total=10,  # Увеличиваем количество попыток
-            backoff_factor=2,  # Увеличиваем время между попытками
-            status_forcelist=[500, 502, 503, 504, 429],  # Добавляем код 429 (too many requests)
+            total=10,  
+            backoff_factor=2,  
+            status_forcelist=[500, 502, 503, 504, 429],  
             allowed_methods=["HEAD", "GET", "OPTIONS"]
         )
         
-        # Увеличиваем таймауты
+        
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
         self.session.timeout = (30, 300)  # (connect timeout, read timeout)
         
-        # Альтернативные URL для API
+       
         self.api_urls = {
             'primary': 'https://www.ebi.ac.uk/chembl/api/data/status',
             'backup': 'https://www.ebi.ac.uk/chembl/api/data/status',
@@ -69,8 +69,8 @@ class ProteinInhibitorCollector:
                 print(f"Попытка подключения к {name} URL...")
                 response = self.session.get(
                     url,
-                    timeout=(30, 300),  # Увеличенный таймаут
-                    headers={'User-Agent': 'Mozilla/5.0'}  # Добавляем User-Agent
+                    timeout=(30, 300),  
+                    headers={'User-Agent': 'Mozilla/5.0'} 
                 )
                 if response.status_code == 200:
                     print(f"✓ Соединение с ChEMBL установлено через {name} URL")
@@ -110,13 +110,13 @@ class ProteinInhibitorCollector:
             try:
                 print(f"Попытка {attempt + 1} получения белковых мишеней...")
                 
-                # Добавляем таймаут и фильтры для оптимизации запроса
+                
                 targets = self.target.filter(
                     target_type="SINGLE PROTEIN",
                     organism="Homo sapiens"
                 ).only(['target_chembl_id', 'pref_name', 'target_type', 'organism'])
                 
-                # Преобразуем итератор в список с таймаутом
+                
                 targets_list = list(targets)
                 
                 print(f"Успешно получено {len(targets_list)} белковых мишеней")
