@@ -10,7 +10,7 @@ class DatasetPreprocessor:
     def __init__(self, input_file):
         self.data = pd.read_csv(input_file)
         self.setup_logging()
-        # Выведем информацию о колонках
+       
         logging.info(f"Доступные колонки в датасете: {self.data.columns.tolist()}")
         
     def setup_logging(self):
@@ -24,22 +24,22 @@ class DatasetPreprocessor:
         """Предобработка датасета для улучшения качества модели"""
         logging.info(f"Начало обработки датасета. Исходный размер: {self.data.shape}")
         
-        # 1. Проверка и удаление дубликатов
+        #удаление дубликатов
         self.data = self.data.drop_duplicates()
         
-        # 2. Нормализация значений активности
+        #Нормализация значений активности
         self.normalize_activity_values()
         
-        # 3. Удаление выбросов по активности
+        #Удаление вбросов по активности
         self.remove_activity_outliers()
         
-        # 4. Кодирование категориальных признаков
+        #Кодирование категориальных признаков
         self.encode_categorical_features()
         
-        # 5. Создание дополнительных признаков
+        #Создание дополнительных признаков
         self.create_additional_features()
         
-        # 6. Фильтрация данных
+        #Фильтрация данных
         self.filter_data()
         
         logging.info(f"Обработка завершена. Итоговый размер: {self.data.shape}")
@@ -47,7 +47,7 @@ class DatasetPreprocessor:
     
     def normalize_activity_values(self):
         """Нормализация значений активности с учетом типа и единиц измерения"""
-        # Преобразование всех значений к единой шкале (например, нМ)
+        #Преобразование всех значений к единой шкале
         def convert_to_nm(row):
             value = row['inhibitor_activity_value']
             units = row['inhibitor_units']
@@ -67,7 +67,7 @@ class DatasetPreprocessor:
             logging.error(f"Отсутствуют необходимые колонки: {missing_columns}")
             raise KeyError(f"Отсутствуют колонки: {missing_columns}")
         
-        # Проверяем и логируем уникальные значения единиц измерения
+        # Проверяем данные 
         unique_units = self.data['inhibitor_units'].unique()
         logging.info(f"Уникальные единицы измерения в данных: {unique_units}")
         
@@ -76,7 +76,7 @@ class DatasetPreprocessor:
         
         logging.info("Значения активности нормализованы и логарифмированы")
         
-        # Визуализация распределения целевой переменной
+        # Визуализация 
         plt.figure(figsize=(10, 5))
         plt.subplot(1, 2, 1)
         sns.histplot(self.data['inhibitor_activity_value'], bins=50, kde=True)
@@ -129,23 +129,23 @@ class DatasetPreprocessor:
         # Отношение молекулярной массы к активности
         self.data['mw_activity_ratio'] = self.data['inhibitor_molecular_weight'] / self.data['normalized_activity']
         
-        # Эффективность лиганда (LE)
+        # Эффективность лиганда 
         self.data['ligand_efficiency'] = -self.data['log_activity'] / self.data['inhibitor_molecular_weight']
         
-        # Липофильная эффективность (LipE)
+        # Липофильная эффективность 
         self.data['lip_efficiency'] = -self.data['log_activity'] - self.data['inhibitor_logp']
         
         logging.info("Созданы дополнительные признаки")
     
     def filter_data(self):
         """Фильтрация данных по заданным критериям"""
-        # Фильтрация по молекулярной массе (правило Липински)
+        # Фильтрация по молекулярной массе 
         initial_length = len(self.data)
         self.data = self.data[self.data['inhibitor_molecular_weight'] <= 500]
         filtered_mw = initial_length - len(self.data)
         logging.info(f"Фильтрация по молекулярной массе: удалено записей: {filtered_mw}")
         
-        # Фильтрация по logP (правило Липински)
+        # Фильтрация по logP 
         initial_length = len(self.data)
         self.data = self.data[self.data['inhibitor_logp'] <= 5]
         filtered_logp = initial_length - len(self.data)
@@ -192,7 +192,6 @@ class DatasetPreprocessor:
 def main():
     preprocessor = DatasetPreprocessor('protein_inhibitors_structured.csv')
     
-    # Выведем первые несколько строк данных для проверки
     logging.info("\nПервые строки датасета:")
     logging.info(preprocessor.data.head())
     
